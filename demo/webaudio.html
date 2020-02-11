@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Peaks.js Demo Page</title>
+    <title>Cosanlab Speaker Annotation</title>
     <style>
       body {
         font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
@@ -79,42 +79,29 @@
   </head>
   <body>
     <div id="titles">
-      <h1>Peaks.js</h1>
+      <h1>Cosan Lab Speaker Annotation</h1>
       <p>
-        Peaks.js is a JavaScript library that allows you to display and
-        interaction with audio waveforms in the browser.
+        Load the assigned audio and segment the clip based on who is speaking.
       </p>
       <p>
-        It was developed by <a href="https://www.bbc.co.uk/rd">BBC R&amp;D</a>
-        to allow audio editors to make accurate clippings of audio content.
-        You can read more about the project
-        <a href="https://waveform.prototyping.bbc.co.uk/">here</a>.
+        Please segment based on the following four categories:<br>
+        - speaker 1 <br>
+        - speaker 2 <br>
+        - speaker 3 <br>
+        - no speech <br>
+        - overlapping speech. <br>
       </p>
 
-      <h2>Demo pages</h2>
-      <p>
-        The following pages demonstrate various configuration options:
-      </p>
-      <p>
-        <a href="index.html">Precomputed Waveform Data</a> |
-        Web Audio API |
-        <a href="zoomable-waveform.html">Single Zoomable Waveform</a> |
-        <a href="overview-waveform.html">Single Fixed Waveform</a> |
-        <a href="cue-events.html">Cue Events</a> |
-        <a href="set-source.html">Changing the Media URL</a> |
-        <a href="multi-channel.html">Multi-Channel Waveform</a> |
-        <a href="custom-markers.html">Custom Point and Segment Markers</a>
-      </p>
-      <h2>Demo: Web Audio API</h2>
-      <p>
-        This demo shows how to use an
-        <a href="https://www.w3.org/TR/webaudio/#AudioContext">AudioContext</a>
-        to compute the waveform in the browser. Due to the memory requirements
-        and processing time needed, this only works well for short duration
-        audio.
-      </p>
     </div>
 
+    <div>
+      <!-- TODO: ADD VIDEO HERE. -->
+      <video id="myVideo" width="320" height="176" controls>
+        <source src="intro.mp4" type="video/mp4">
+      </video>
+      <!-- https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_av_prop_currenttime -->
+
+    </div>
     <div id="waveform-container">
       <div id="zoomview-container"></div>
       <div id="overview-container"></div>
@@ -130,11 +117,16 @@
       <div id="controls">
         <button data-action="zoom-in">Zoom in</button>
         <button data-action="zoom-out">Zoom out</button>
-        <button data-action="add-segment">Add a Segment at current time</button>
-        <button data-action="add-point">Add a Point at current time</button>
+        <button data-action="add-segment1">Add segment: Speaker 1</button>
+        <button data-action="add-segment2">Add segment: Speaker 2</button>
+        <button data-action="add-segment3">Add segment: Speaker 3</button>
+        <button data-action="add-segment-no">Add segment: No speech</button>
+        <button data-action="add-segment-over">Add segment: Overlapping speech</button>
+        <button data-action="add-point-expstart">Add Trial Start indicator</button>
         <button data-action="log-data">Log segments/points</button>
         <input type="text" id="seek-time" value="0.0">
         <button data-action="seek">Seek</button>
+        <button data-action="download">Download results</button>
       </div>
     </div>
 
@@ -185,9 +177,9 @@
 
             var row = '<tr>' +
               '<td>' + segment.id + '</td>' +
-              '<td>' + segment.labelText + '</td>' +
               '<td>' + segment.startTime + '</td>' +
               '<td>' + segment.endTime + '</td>' +
+              '<td>' + segment.labelText + '</td>' +
               '<td>' + '<a href="#' + segment.id + '" data-action="play-segment" data-id="' + segment.id + '">Play</a>' + '</td>' +
               '<td>' + '<a href="#' + segment.id + '" data-action="remove-segment" data-id="' + segment.id + '">Remove</a>' + '</td>' +
               '</tr>';
@@ -212,8 +204,8 @@
 
             var row = '<tr>' +
               '<td>' + point.id + '</td>' +
-              '<td>' + point.labelText + '</td>' +
               '<td>' + point.time + '</td>' +
+              '<td>' + point.labelText + '</td>' +
               '<td>' + '<a href="#' + point.id + '" data-action="remove-point" data-id="' + point.id + '">Remove</a>' + '</td>' +
               '</tr>';
 
@@ -243,13 +235,14 @@
             scale: 128,
             multiChannel: false
           },
+          emitCueEvents: true,
           keyboard: true,
           pointMarkerColor: '#006eb0',
           showPlayheadTime: true,
           zoomLevels: [128, 256, 512, 1024, 2048, 4096]
         };
 
-        Peaks.init(options, function(err, peaksInstance) {
+        peak = Peaks.init(options, function(err, peaksInstance) {
           if (err) {
             console.error(err.message);
             return;
@@ -265,21 +258,60 @@
             peaksInstance.zoom.zoomOut();
           });
 
-          document.querySelector('button[data-action="add-segment"]').addEventListener('click', function() {
+          document.querySelector('button[data-action="add-segment1"]').addEventListener('click', function() {
             peaksInstance.segments.add({
               startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 10,
-              labelText: "Test segment",
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Speaker 1",
               editable: true
             });
+            renderSegments(peaksInstance);
+            seekAndPlayVideo();
+          });
+          document.querySelector('button[data-action="add-segment2"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Speaker 2",
+              editable: true
+            });
+            renderSegments(peaksInstance);
+          });
+          document.querySelector('button[data-action="add-segment3"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Speaker 3",
+              editable: true
+            });
+            renderSegments(peaksInstance);
+          });
+          document.querySelector('button[data-action="add-segment-no"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "No Speaker",
+              editable: true
+            });
+            renderSegments(peaksInstance);
+          });
+          document.querySelector('button[data-action="add-segment-over"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Overlapping Speaker",
+              editable: true
+            });
+            renderSegments(peaksInstance);
           });
 
-          document.querySelector('button[data-action="add-point"]').addEventListener('click', function() {
+          document.querySelector('button[data-action="add-point-expstart"]').addEventListener('click', function() {
             peaksInstance.points.add({
               time: peaksInstance.player.getCurrentTime(),
-              labelText: "Test point",
+              labelText: "Start experiment",
               editable: true
             });
+            renderPoints(peaksInstance);
           });
 
           document.querySelector('button[data-action="log-data"]').addEventListener('click', function(event) {
@@ -293,7 +325,12 @@
 
             if (!Number.isNaN(seconds)) {
               peaksInstance.player.seek(seconds);
+              vid.currentTime = peaksInstance.player.getCurrentTime();
             }
+          });
+
+          document.querySelector('button[data-action="download"]').addEventListener('click', function(event) {
+            // TODO: Download all the segmentation and point results.
           });
 
           document.querySelector('body').addEventListener('click', function(event) {
@@ -304,12 +341,18 @@
             if (action === 'play-segment') {
               var segment = peaksInstance.segments.getSegment(id);
               peaksInstance.player.playSegment(segment);
+              vid.currentTime = peaksInstance.player.getCurrentTime();
+              vid.play()
             }
             else if (action === 'remove-point') {
               peaksInstance.points.removeById(id);
+              renderSegments(peaksInstance);
+              renderPoints(peaksInstance);
             }
             else if (action === 'remove-segment') {
               peaksInstance.segments.removeById(id);
+              renderSegments(peaksInstance);
+              renderPoints(peaksInstance);
             }
           });
 
@@ -338,6 +381,19 @@
           peaksInstance.on('points.dragend', function(point) {
             console.log('points.dragend:', point);
           });
+
+          // DO STUFF ON VIDEOS
+          var vid = document.getElementById("myVideo");
+          vid.defaultMuted = true;
+
+          function seekAndPlayVideo() {
+            vid.currentTime = peaksInstance.player.getCurrentTime();
+          };
+
+          peaksInstance.on('segments.exit', function(segment) {
+            vid.pause();
+          });
+
         });
       })(peaks);
     </script>
