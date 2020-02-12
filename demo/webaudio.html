@@ -8,7 +8,7 @@
         font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
       }
 
-      #titles, #waveform-container {
+      #titles, #waveform-container, #video-container {
         margin: 24px auto;
         width: 1000px;
       }
@@ -84,7 +84,7 @@
         Load the assigned audio and segment the clip based on who is speaking.
       </p>
       <p>
-        Please segment based on the following four categories:<br>
+        Please segment based on the following categories:<br>
         - speaker 1 <br>
         - speaker 2 <br>
         - speaker 3 <br>
@@ -94,14 +94,14 @@
 
     </div>
 
-    <div>
+    <div id="video-container">
       <!-- TODO: ADD VIDEO HERE. -->
-      <video id="myVideo" width="320" height="176" controls>
+      <video id="myVideo" width="640" height="360" controls>
         <source src="intro.mp4" type="video/mp4">
       </video>
       <!-- https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_av_prop_currenttime -->
-
     </div>
+
     <div id="waveform-container">
       <div id="zoomview-container"></div>
       <div id="overview-container"></div>
@@ -164,6 +164,7 @@
       </div>
     </div>
 
+    <script type="text/javascript" src="FileSaver.min.js"></script>
     <script src="peaks.js"></script>
     <script>
       (function(Peaks) {
@@ -266,7 +267,6 @@
               editable: true
             });
             renderSegments(peaksInstance);
-            seekAndPlayVideo();
           });
           document.querySelector('button[data-action="add-segment2"]').addEventListener('click', function() {
             peaksInstance.segments.add({
@@ -331,6 +331,18 @@
 
           document.querySelector('button[data-action="download"]').addEventListener('click', function(event) {
             // TODO: Download all the segmentation and point results.
+            console.log("Downloading");
+            segments = peaksInstance.segments.getSegments();
+            let toSave = {};
+            segments.forEach((obj) => {
+              toSave[obj._id] = { startTime: obj._startTime,
+                endTime: obj._endTime,
+                id: obj._id,
+                labelText: obj._labelText };
+            });
+            var blob = new Blob([JSON.stringify(toSave)], {type: "application/json"});
+            var saveAs = window.saveAs;
+            saveAs(blob, "groupdm_segmentation.json");
           });
 
           document.querySelector('body').addEventListener('click', function(event) {
@@ -386,14 +398,14 @@
           var vid = document.getElementById("myVideo");
           vid.defaultMuted = true;
 
-          function seekAndPlayVideo() {
-            vid.currentTime = peaksInstance.player.getCurrentTime();
-          };
+          // function seekAndPlayVideo() {
+          //   vid.currentTime = peaksInstance.player.getCurrentTime();
+          // };
 
           peaksInstance.on('segments.exit', function(segment) {
             vid.pause();
           });
-
+          // How do I make the player emit a signal to play the video too???
         });
       })(peaks);
     </script>
