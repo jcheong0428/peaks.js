@@ -2,13 +2,13 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Peaks.js Demo Page</title>
+    <title>Cosanlab Speaker Annotation</title>
     <style>
       body {
         font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
       }
 
-      #titles, #waveform-container {
+      #titles, #waveform-container, #video-container {
         margin: 24px auto;
         width: 1000px;
       }
@@ -79,38 +79,27 @@
   </head>
   <body>
     <div id="titles">
-      <h1>Peaks.js</h1>
+      <h1>Cosan Lab Speaker Annotation</h1>
       <p>
-        Peaks.js is a JavaScript library that allows you to display and
-        interaction with audio waveforms in the browser.
+        Load the assigned audio and segment the clip based on who is speaking.
       </p>
       <p>
-        It was developed by <a href="https://www.bbc.co.uk/rd">BBC R&amp;D</a>
-        to allow audio editors to make accurate clippings of audio content.
-        You can read more about the project
-        <a href="https://waveform.prototyping.bbc.co.uk/">here</a>.
+        Please segment based on the following categories:<br>
+        - speaker 1 <br>
+        - speaker 2 <br>
+        - speaker 3 <br>
+        - no speech <br>
+        - overlapping speech. <br>
       </p>
 
-      <h2>Demo pages</h2>
-      <p>
-        The following pages demonstrate various configuration options:
-      </p>
-      <p>
-        Precomputed Waveform Data |
-        <a href="webaudio.html">Web Audio API</a> |
-        <a href="zoomable-waveform.html">Single Zoomable Waveform</a> |
-        <a href="overview-waveform.html">Single Fixed Waveform</a> |
-        <a href="cue-events.html">Cue Events</a> |
-        <a href="set-source.html">Changing the Media URL</a> |
-        <a href="multi-channel.html">Multi-Channel Waveform</a> |
-        <a href="custom-markers.html">Custom Point and Segment Markers</a>
-      </p>
-      <h2>Demo: Precomputed Waveform Data</h2>
-      <p>
-        This demo shows how to use waveform data precomputed using
-        <a href="https://github.com/bbc/audiowaveform">audiowaveform</a>.
-        The data is requested from the web server in binary or JSON format.
-      </p>
+    </div>
+
+    <div id="video-container">
+      <!-- TODO: ADD VIDEO HERE. -->
+      <video id="myVideo" width="640" height="360" controls>
+        <source src="intro.mp4" type="video/mp4">
+      </video>
+      <!-- https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_av_prop_currenttime -->
     </div>
 
     <div id="waveform-container">
@@ -128,19 +117,16 @@
       <div id="controls">
         <button data-action="zoom-in">Zoom in</button>
         <button data-action="zoom-out">Zoom out</button>
-        <button data-action="add-segment">Add a Segment at current time</button>
-        <button data-action="add-point">Add a Point at current time</button>
+        <button data-action="add-segment1">Add segment: Speaker 1</button>
+        <button data-action="add-segment2">Add segment: Speaker 2</button>
+        <button data-action="add-segment3">Add segment: Speaker 3</button>
+        <button data-action="add-segment-no">Add segment: No speech</button>
+        <button data-action="add-segment-over">Add segment: Overlapping speech</button>
+        <button data-action="add-point-expstart">Add Trial Start indicator</button>
         <button data-action="log-data">Log segments/points</button>
         <input type="text" id="seek-time" value="0.0">
         <button data-action="seek">Seek</button>
-        <label for="amplitude-scale">Amplitude scale</label>
-        <input type="range" id="amplitude-scale" min="0" max="10" step="1">
-        <input type="checkbox" id="auto-scroll" checked>
-        <label for="auto-scroll">Auto-scroll</label>
-        <button data-action="resize">Resize</button>
-        <button data-action="toggle-zoomview">Show/hide zoomable waveform</button>
-        <button data-action="toggle-overview">Show/hide overview waveform</button>
-        <button data-action="destroy">Destroy</button>
+        <button data-action="download">Download results</button>
       </div>
     </div>
 
@@ -178,6 +164,7 @@
       </div>
     </div>
 
+    <script type="text/javascript" src="FileSaver.min.js"></script>
     <script src="peaks.js"></script>
     <script>
       (function(Peaks) {
@@ -191,9 +178,9 @@
 
             var row = '<tr>' +
               '<td>' + segment.id + '</td>' +
-              '<td><input data-action="update-segment-label" type="text" value="' + segment.labelText + '" data-id="' + segment.id + '"/></td>' +
-              '<td><input data-action="update-segment-start-time" type="number" value="' + segment.startTime + '" data-id="' + segment.id + '"/></td>' +
-              '<td><input data-action="update-segment-end-time" type="number" value="' + segment.endTime + '" data-id="' + segment.id + '"/></td>' +
+              '<td>' + segment.startTime + '</td>' +
+              '<td>' + segment.endTime + '</td>' +
+              '<td>' + segment.labelText + '</td>' +
               '<td>' + '<a href="#' + segment.id + '" data-action="play-segment" data-id="' + segment.id + '">Play</a>' + '</td>' +
               '<td>' + '<a href="#' + segment.id + '" data-action="remove-segment" data-id="' + segment.id + '">Remove</a>' + '</td>' +
               '</tr>';
@@ -206,68 +193,7 @@
           if (html.length) {
             segmentsContainer.classList.remove('hide');
           }
-
-          document.querySelectorAll('input[data-action="update-segment-start-time"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var segment = peaks.segments.getSegment(id);
-
-              if (segment) {
-                var startTime = parseFloat(element.value);
-
-                if (startTime < 0) {
-                  startTime = 0;
-                  element.value = 0;
-                }
-
-                if (startTime >= segment.endTime) {
-                  startTime = segment.endTime - 0.1;
-                  element.value = startTime;
-                }
-
-                segment.update({ startTime: startTime });
-              }
-            });
-          });
-
-          document.querySelectorAll('input[data-action="update-segment-end-time"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var segment = peaks.segments.getSegment(id);
-
-              if (segment) {
-                var endTime = parseFloat(element.value);
-
-                if (endTime < 0) {
-                  endTime = 0;
-                  element.value = 0;
-                }
-
-                if (endTime <= segment.startTime) {
-                  endTime = segment.startTime + 0.1;
-                  element.value = endTime;
-                }
-
-                segment.update({ endTime: endTime });
-              }
-            });
-          });
-
-          document.querySelectorAll('input[data-action="update-segment-label"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var segment = peaks.segments.getSegment(id);
-              var labelText = element.labelText;
-
-              if (segment) {
-                segment.update({ labelText: labelText });
-              }
-            });
-          });
-        };
+        }
 
         var renderPoints = function(peaks) {
           var pointsContainer = document.getElementById('points');
@@ -279,8 +205,8 @@
 
             var row = '<tr>' +
               '<td>' + point.id + '</td>' +
-              '<td><input data-action="update-point-label" type="text" value="' + point.labelText + '" data-id="' + point.id + '"/></td>' +
-              '<td><input data-action="update-point-time" type="number" value="' + point.time + '" data-id="' + point.id + '"/></td>' +
+              '<td>' + point.time + '</td>' +
+              '<td>' + point.labelText + '</td>' +
               '<td>' + '<a href="#' + point.id + '" data-action="remove-point" data-id="' + point.id + '">Remove</a>' + '</td>' +
               '</tr>';
 
@@ -292,62 +218,38 @@
           if (html.length) {
             pointsContainer.classList.remove('hide');
           }
+        }
 
-          document.querySelectorAll('input[data-action="update-point-time"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var point = peaks.points.getPoint(id);
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        var audioContext = new AudioContext();
 
-              if (point) {
-                var time = parseFloat(element.value);
-
-                if (time < 0) {
-                  time = 0;
-                  element.value = 0;
-                }
-
-                point.update({ time: time });
-              }
-            });
-          });
-
-          document.querySelectorAll('input[data-action="update-point-label"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var point = peaks.points.getPoint(id);
-              var labelText = element.labelText;
-
-              if (point) {
-                point.update({ labelText: labelText });
-              }
-            });
-          });
-        };
+        var audioElement = document.getElementById('audio');
 
         var options = {
           containers: {
             zoomview: document.getElementById('zoomview-container'),
             overview: document.getElementById('overview-container')
           },
-          mediaElement: document.getElementById('audio'),
-          dataUri: {
-            arraybuffer: 'TOL_6min_720p_download.dat',
-            json: 'TOL_6min_720p_download.json'
+          mediaElement: audioElement,
+          webAudio: {
+            audioContext: audioContext,
+            scale: 128,
+            multiChannel: false
           },
+          emitCueEvents: true,
           keyboard: true,
           pointMarkerColor: '#006eb0',
-          showPlayheadTime: true
+          showPlayheadTime: true,
+          zoomLevels: [128, 256, 512, 1024, 2048, 4096]
         };
 
-        Peaks.init(options, function(err, peaksInstance) {
+        peak = Peaks.init(options, function(err, peaksInstance) {
           if (err) {
             console.error(err.message);
             return;
           }
 
-          console.log("Peaks instance ready");
+          console.log('Peaks instance ready');
 
           document.querySelector('[data-action="zoom-in"]').addEventListener('click', function() {
             peaksInstance.zoom.zoomIn();
@@ -357,23 +259,59 @@
             peaksInstance.zoom.zoomOut();
           });
 
-          var segmentCounter = 1;
-
-          document.querySelector('button[data-action="add-segment"]').addEventListener('click', function() {
+          document.querySelector('button[data-action="add-segment1"]').addEventListener('click', function() {
             peaksInstance.segments.add({
               startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 10,
-              labelText: 'Test segment ' + segmentCounter++,
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Speaker 1",
               editable: true
             });
+            renderSegments(peaksInstance);
+          });
+          document.querySelector('button[data-action="add-segment2"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Speaker 2",
+              editable: true
+            });
+            renderSegments(peaksInstance);
+          });
+          document.querySelector('button[data-action="add-segment3"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Speaker 3",
+              editable: true
+            });
+            renderSegments(peaksInstance);
+          });
+          document.querySelector('button[data-action="add-segment-no"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "No Speaker",
+              editable: true
+            });
+            renderSegments(peaksInstance);
+          });
+          document.querySelector('button[data-action="add-segment-over"]').addEventListener('click', function() {
+            peaksInstance.segments.add({
+              startTime: peaksInstance.player.getCurrentTime(),
+              endTime: peaksInstance.player.getCurrentTime() + 3,
+              labelText: "Overlapping Speaker",
+              editable: true
+            });
+            renderSegments(peaksInstance);
           });
 
-          document.querySelector('button[data-action="add-point"]').addEventListener('click', function() {
+          document.querySelector('button[data-action="add-point-expstart"]').addEventListener('click', function() {
             peaksInstance.points.add({
               time: peaksInstance.player.getCurrentTime(),
-              labelText: 'Test point',
+              labelText: "Start experiment",
               editable: true
             });
+            renderPoints(peaksInstance);
           });
 
           document.querySelector('button[data-action="log-data"]').addEventListener('click', function(event) {
@@ -387,16 +325,24 @@
 
             if (!Number.isNaN(seconds)) {
               peaksInstance.player.seek(seconds);
+              vid.currentTime = peaksInstance.player.getCurrentTime();
             }
           });
 
-          document.querySelector('button[data-action="destroy"]').addEventListener('click', function(event) {
-            peaksInstance.destroy();
-          });
-
-          document.getElementById('auto-scroll').addEventListener('change', function(event) {
-            var view = peaksInstance.views.getView('zoomview');
-            view.enableAutoScroll(event.target.checked);
+          document.querySelector('button[data-action="download"]').addEventListener('click', function(event) {
+            // TODO: Download all the segmentation and point results.
+            console.log("Downloading");
+            segments = peaksInstance.segments.getSegments();
+            let toSave = {};
+            segments.forEach((obj) => {
+              toSave[obj._id] = { startTime: obj._startTime,
+                endTime: obj._endTime,
+                id: obj._id,
+                labelText: obj._labelText };
+            });
+            var blob = new Blob([JSON.stringify(toSave)], {type: "application/json"});
+            var saveAs = window.saveAs;
+            saveAs(blob, "groupdm_segmentation.json");
           });
 
           document.querySelector('body').addEventListener('click', function(event) {
@@ -407,82 +353,18 @@
             if (action === 'play-segment') {
               var segment = peaksInstance.segments.getSegment(id);
               peaksInstance.player.playSegment(segment);
+              vid.currentTime = peaksInstance.player.getCurrentTime();
+              vid.play()
             }
             else if (action === 'remove-point') {
               peaksInstance.points.removeById(id);
+              renderSegments(peaksInstance);
+              renderPoints(peaksInstance);
             }
             else if (action === 'remove-segment') {
               peaksInstance.segments.removeById(id);
-            }
-          });
-
-          var amplitudeScales = {
-            "0": 0.0,
-            "1": 0.1,
-            "2": 0.25,
-            "3": 0.5,
-            "4": 0.75,
-            "5": 1.0,
-            "6": 1.5,
-            "7": 2.0,
-            "8": 3.0,
-            "9": 4.0,
-            "10": 5.0
-          };
-
-          document.getElementById('amplitude-scale').addEventListener('input', function(event) {
-            var scale = amplitudeScales[event.target.value];
-
-            peaksInstance.views.getView('zoomview').setAmplitudeScale(scale);
-            peaksInstance.views.getView('overview').setAmplitudeScale(scale);
-          });
-
-          document.querySelector('button[data-action="resize"]').addEventListener('click', function(event) {
-            var zoomviewContainer = document.getElementById('zoomview-container');
-            var overviewContainer = document.getElementById('overview-container');
-
-            var zoomviewStyle = zoomviewContainer.offsetHeight === 200 ? 'height:300px' : 'height:200px';
-            var overviewStyle = overviewContainer.offsetHeight === 85  ? 'height:200px' : 'height:85px';
-
-            zoomviewContainer.setAttribute('style', zoomviewStyle);
-            overviewContainer.setAttribute('style', overviewStyle);
-
-            var zoomview = peaksInstance.views.getView('zoomview');
-            if (zoomview) {
-              zoomview.fitToContainer();
-            }
-
-            var overview = peaksInstance.views.getView('overview');
-            if (overview) {
-              overview.fitToContainer();
-            }
-          });
-
-          document.querySelector('button[data-action="toggle-zoomview"]').addEventListener('click', function(event) {
-            var container = document.getElementById('zoomview-container');
-            var zoomview = peaksInstance.views.getView('zoomview');
-
-            if (zoomview) {
-              peaksInstance.views.destroyZoomview();
-              container.style.display = 'none';
-            }
-            else {
-              container.style.display = 'block';
-              peaksInstance.views.createZoomview(container);
-            }
-          });
-
-          document.querySelector('button[data-action="toggle-overview"]').addEventListener('click', function(event) {
-            var container = document.getElementById('overview-container');
-            var overview = peaksInstance.views.getView('overview');
-
-            if (overview) {
-              peaksInstance.views.destroyOverview();
-              container.style.display = 'none';
-            }
-            else {
-              container.style.display = 'block';
-              peaksInstance.views.createOverview(container);
+              renderSegments(peaksInstance);
+              renderPoints(peaksInstance);
             }
           });
 
@@ -512,39 +394,30 @@
             console.log('points.dragend:', point);
           });
 
-          // Segments mouse events
+          // DO STUFF ON VIDEOS
+          var vid = document.getElementById("myVideo");
+          vid.defaultMuted = true;
 
-          peaksInstance.on('segments.dragstart', function(segment, startMarker) {
-            console.log('segments.dragstart:', segment, startMarker);
+          // function seekAndPlayVideo() {
+          //   vid.currentTime = peaksInstance.player.getCurrentTime();
+          // };
+
+          peaksInstance.on('segments.exit', function(segment) {
+            vid.pause();
           });
 
-          peaksInstance.on('segments.dragend', function(segment, startMarker) {
-            console.log('segments.dragend:', segment, startMarker);
+          peaksInstance.on('player_play', function(segment) {
+            vid.currentTime = peaksInstance.player.getCurrentTime();
+            vid.play()
           });
-
-          peaksInstance.on('segments.dragged', function(segment, startMarker) {
-            console.log('segments.dragged:', segment, startMarker);
+          peaksInstance.on('player_pause', function(segment) {
+            vid.currentTime = peaksInstance.player.getCurrentTime();
+            vid.pause()
           });
-
-          peaksInstance.on('segments.mouseenter', function(segment) {
-            console.log('segments.mouseenter:', segment);
+          peaksInstance.on('player_seek', function(segment) {
+            vid.currentTime = peaksInstance.player.getCurrentTime();
           });
-
-          peaksInstance.on('segments.mouseleave', function(segment) {
-            console.log('segments.mouseleave:', segment);
-          });
-
-          peaksInstance.on('segments.click', function(segment) {
-            console.log('segments.click:', segment);
-          });
-
-          peaksInstance.on('zoomview.dblclick', function(time) {
-            console.log('zoomview.dblclick:', time);
-          });
-
-          peaksInstance.on('overview.dblclick', function(time) {
-            console.log('overview.dblclick:', time);
-          });
+          // How do I make the player emit a signal to play the video too???
         });
       })(peaks);
     </script>
