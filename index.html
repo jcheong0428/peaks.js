@@ -322,7 +322,7 @@
           document.querySelector('button[data-action="add-point-expstart"]').addEventListener('click', function() {
             peaksInstance.points.add({
               time: peaksInstance.player.getCurrentTime(),
-              labelText: "Start experiment",
+              labelText: "Start trial",
               editable: true
             });
             renderPoints(peaksInstance);
@@ -354,9 +354,20 @@
                 id: obj._id,
                 labelText: obj._labelText };
             });
-            var blob = new Blob([JSON.stringify(toSave)], {type: "application/json"});
+            // var blob = new Blob([JSON.stringify(toSave)], {type: "application/json"});
+            // var saveAs = window.saveAs;
+            // saveAs(blob, "groupdm_segmentation.json");
+            // Save points
+            points = peaksInstance.points.getPoints();
+            let toSavePoints = {};
+            points.forEach((obj) => {
+              toSavePoints[obj._id] = { startTime: obj._time,
+                id: obj._id,
+                labelText: obj._labelText };
+            });
+            var blob = new Blob([JSON.stringify(toSave),'\n',JSON.stringify(toSavePoints)], {type: "application/json"});
             var saveAs = window.saveAs;
-            saveAs(blob, "groupdm_segmentation.json");
+            saveAs(blob, "groupdm_segments.json");
           });
 
           document.querySelector('body').addEventListener('click', function(event) {

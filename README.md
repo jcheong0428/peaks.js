@@ -6,7 +6,6 @@ http://speakersegmentation.herokuapp.com/
 
 # Todo's
 - new segment start time should match previous end time.
-- also download point.
 
 # Instructions
 1. Load audio & video file corresponding to the same group.
