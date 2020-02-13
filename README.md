@@ -4,9 +4,6 @@ User may load an audio & video and add segments indicating speakers IDs, no spee
 # Deployed website
 http://speakersegmentation.herokuapp.com/
 
-# Todo's
-- new segment start time should match previous end time.
-
 # Instructions
 1. Load audio & video file corresponding to the same group.
 2. Identify what speaker number to associate with each participant.

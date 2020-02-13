@@ -129,6 +129,8 @@
         <button data-action="log-data">Log segments/points</button>
         <input type="text" id="seek-time" value="0.0">
         <button data-action="seek">Seek</button>
+        <label for="amplitude-scale">Amplitude scale</label>
+        <input type="range" id="amplitude-scale" min="0" max="10" step="1">
         <button data-action="download">Download results</button>
       </div>
     </div>
@@ -274,45 +276,80 @@
           });
 
           document.querySelector('button[data-action="add-segment1"]').addEventListener('click', function() {
+            segments = peaksInstance.segments.getSegments();
+            if(segments.length>0) {
+              lastSegment = segments[segments.length-1];
+              startTime = lastSegment.endTime;
+            } else {
+              startTime = peaksInstance.player.getCurrentTime()
+            }
             peaksInstance.segments.add({
-              startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 3,
+              startTime: startTime,
+              endTime: startTime + 3,
               labelText: "Speaker 1",
               editable: true
             });
             renderSegments(peaksInstance);
           });
           document.querySelector('button[data-action="add-segment2"]').addEventListener('click', function() {
+            segments = peaksInstance.segments.getSegments();
+            if(segments.length>0) {
+              lastSegment = segments[segments.length-1];
+              startTime = lastSegment.endTime;
+            } else {
+              startTime = peaksInstance.player.getCurrentTime()
+            }
             peaksInstance.segments.add({
-              startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 3,
+              startTime: startTime,
+              endTime: startTime + 3,
               labelText: "Speaker 2",
               editable: true
             });
             renderSegments(peaksInstance);
           });
           document.querySelector('button[data-action="add-segment3"]').addEventListener('click', function() {
+            segments = peaksInstance.segments.getSegments();
+            if(segments.length>0) {
+              lastSegment = segments[segments.length-1];
+              startTime = lastSegment.endTime;
+            } else {
+              startTime = peaksInstance.player.getCurrentTime()
+            }
             peaksInstance.segments.add({
-              startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 3,
+              startTime: startTime,
+              endTime: startTime + 3,
               labelText: "Speaker 3",
               editable: true
             });
             renderSegments(peaksInstance);
           });
           document.querySelector('button[data-action="add-segment-no"]').addEventListener('click', function() {
+            segments = peaksInstance.segments.getSegments();
+            if(segments.length>0) {
+              lastSegment = segments[segments.length-1];
+              startTime = lastSegment.endTime;
+            } else {
+              startTime = peaksInstance.player.getCurrentTime()
+            }
             peaksInstance.segments.add({
-              startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 3,
+              startTime: startTime,
+              endTime: startTime + 3,
               labelText: "No Speaker",
               editable: true
             });
             renderSegments(peaksInstance);
           });
           document.querySelector('button[data-action="add-segment-over"]').addEventListener('click', function() {
+            segments = peaksInstance.segments.getSegments();
+            if(segments.length>0) {
+              lastSegment = segments[segments.length-1];
+              startTime = lastSegment.endTime;
+            } else {
+              startTime = peaksInstance.player.getCurrentTime()
+            }
             peaksInstance.segments.add({
-              startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 3,
+              startTime: startTime,
+              endTime: startTime + 3,
               labelText: "Overlapping Speaker",
               editable: true
             });
@@ -391,6 +428,27 @@
               renderSegments(peaksInstance);
               renderPoints(peaksInstance);
             }
+          });
+
+          var amplitudeScales = {
+            "0": 0.0,
+            "1": 0.1,
+            "2": 0.25,
+            "3": 0.5,
+            "4": 0.75,
+            "5": 1.0,
+            "6": 1.5,
+            "7": 2.0,
+            "8": 3.0,
+            "9": 4.0,
+            "10": 5.0
+          };
+
+          document.getElementById('amplitude-scale').addEventListener('input', function(event) {
+            var scale = amplitudeScales[event.target.value];
+
+            peaksInstance.views.getView('zoomview').setAmplitudeScale(scale);
+            peaksInstance.views.getView('overview').setAmplitudeScale(scale);
           });
 
           // Points mouse events
