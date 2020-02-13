@@ -91,13 +91,17 @@
         - no speech <br>
         - overlapping speech. <br>
       </p>
-
+      <h2>Load the audio and video files here.</h2>
+      Load audio file:
+      <input type="file" id="audio_input" class="file_audio"accept="audio/*">
+      <br>
+      Load video file:
+      <input type="file" id="video_input" class="file_video" accept="video/*">
     </div>
 
     <div id="video-container">
-      <!-- TODO: ADD VIDEO HERE. -->
-      <video id="myVideo" width="640" height="360" controls>
-        <source src="intro.mp4" type="video/mp4">
+      <video id="video" class="video" width="640" height="360" controls>
+        <source src="" type="video/mp4">
       </video>
       <!-- https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_av_prop_currenttime -->
     </div>
@@ -108,9 +112,8 @@
     </div>
 
     <div id="demo-controls">
-      <audio id="audio" controls="controls">
-        <source src="TOL_6min_720p_download.mp3" type="audio/mpeg">
-        <source src="TOL_6min_720p_download.ogg" type="audio/ogg">
+      <audio id="audio" class="audio" controls="controls">
+        <source src="" type="audio/mpeg">
         Your browser does not support the audio element.
       </audio>
 
@@ -165,6 +168,7 @@
     </div>
 
     <script type="text/javascript" src="FileSaver.min.js"></script>
+    <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
     <script src="peaks.js"></script>
     <script>
       (function(Peaks) {
@@ -241,6 +245,16 @@
           pointMarkerColor: '#006eb0',
           showPlayheadTime: true,
           zoomLevels: [128, 256, 512, 1024, 2048, 4096]
+        };
+
+        function loadAudioFile() {
+          var aud = document.getElementById('audio');
+          aud.src = document.getElementById('audio_input').value;
+        };
+
+        function loadVideoFile() {
+          var vid = document.getElementById('video');
+          vid.src = document.getElementById('video_input').value;
         };
 
         peak = Peaks.init(options, function(err, peaksInstance) {
@@ -395,7 +409,7 @@
           });
 
           // DO STUFF ON VIDEOS
-          var vid = document.getElementById("myVideo");
+          var vid = document.getElementById("video");
           vid.defaultMuted = true;
 
           // function seekAndPlayVideo() {
@@ -420,6 +434,18 @@
           // How do I make the player emit a signal to play the video too???
         });
       })(peaks);
+
+// https://stackoverflow.com/questions/36035721/how-can-i-set-preview-of-video-file-selecting-from-input-type-file/40580663
+      $ ("#video_input").change(function () {
+         var fileInput = document.getElementById('video_input');
+         var fileUrl = window.URL.createObjectURL(fileInput.files[0]);
+         $(".video").attr("src", fileUrl);
+      });
+      $ ("#audio_input").change(function () {
+         var fileInput = document.getElementById('audio_input');
+         var fileUrl = window.URL.createObjectURL(fileInput.files[0]);
+         $(".audio").attr("src", fileUrl);
+      });
     </script>
   </body>
 </html>
