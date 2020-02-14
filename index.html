@@ -128,7 +128,9 @@
         <button data-action="add-point-expstart">Add Trial Start indicator</button>
         <button data-action="log-data">Log segments/points</button>
         <input type="text" id="seek-time" value="0.0">
-        <button data-action="seek">Seek</button>
+        <button data-action="seek">SeekSecond</button>
+        <input type="text" id="play-speed" value="1.0">
+        <button data-action="playspeed">ChangePlaySpeed</button>
         <label for="amplitude-scale">Amplitude scale</label>
         <input type="range" id="amplitude-scale" min="0" max="10" step="1">
         <button data-action="download">Download results</button>
@@ -377,6 +379,18 @@
             if (!Number.isNaN(seconds)) {
               peaksInstance.player.seek(seconds);
               vid.currentTime = peaksInstance.player.getCurrentTime();
+            }
+          });
+
+          document.querySelector('button[data-action="playspeed"]').addEventListener('click', function(event) {
+            var playspeedtxt = document.getElementById('play-speed').value;
+            var playspeed = parseFloat(playspeedtxt);
+
+            if (!Number.isNaN(playspeed)) {
+              var vid = document.getElementById("video");
+              vid.playbackRate = playspeed;
+              var aud = document.getElementById("audio");
+              aud.playbackRate = playspeed;
             }
           });
 
