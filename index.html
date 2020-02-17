@@ -82,14 +82,16 @@
       <h1>Cosan Lab Speaker Annotation</h1>
       <p>
         Load the assigned audio and segment the clip based on who is speaking.
+        Segments can overlap if they speak at the same time.
+        Leave unsegmented if there is no talking or gaps between speakers.
       </p>
       <p>
         Please segment based on the following categories:<br>
         - speaker 1 <br>
         - speaker 2 <br>
         - speaker 3 <br>
-        - no speech <br>
-        - overlapping speech. <br>
+        <!-- - no speech <br>
+        - overlapping speech. <br> -->
       </p>
       <h2>Load the audio and video files here.</h2>
       Load audio file:
@@ -278,13 +280,14 @@
           });
 
           document.querySelector('button[data-action="add-segment1"]').addEventListener('click', function() {
-            segments = peaksInstance.segments.getSegments();
-            if(segments.length>0) {
-              lastSegment = segments[segments.length-1];
-              startTime = lastSegment.endTime;
-            } else {
-              startTime = peaksInstance.player.getCurrentTime()
-            }
+            // segments = peaksInstance.segments.getSegments();
+            // if(segments.length>0) {
+            //   lastSegment = segments[segments.length-1];
+            //   startTime = lastSegment.endTime;
+            // } else {
+            //   startTime = peaksInstance.player.getCurrentTime()
+            // }
+            startTime = peaksInstance.player.getCurrentTime()
             peaksInstance.segments.add({
               startTime: startTime,
               endTime: startTime + 3,
@@ -294,13 +297,14 @@
             renderSegments(peaksInstance);
           });
           document.querySelector('button[data-action="add-segment2"]').addEventListener('click', function() {
-            segments = peaksInstance.segments.getSegments();
-            if(segments.length>0) {
-              lastSegment = segments[segments.length-1];
-              startTime = lastSegment.endTime;
-            } else {
-              startTime = peaksInstance.player.getCurrentTime()
-            }
+            // segments = peaksInstance.segments.getSegments();
+            // if(segments.length>0) {
+            //   lastSegment = segments[segments.length-1];
+            //   startTime = lastSegment.endTime;
+            // } else {
+            //   startTime = peaksInstance.player.getCurrentTime()
+            // }
+            startTime = peaksInstance.player.getCurrentTime()
             peaksInstance.segments.add({
               startTime: startTime,
               endTime: startTime + 3,
@@ -310,13 +314,14 @@
             renderSegments(peaksInstance);
           });
           document.querySelector('button[data-action="add-segment3"]').addEventListener('click', function() {
-            segments = peaksInstance.segments.getSegments();
-            if(segments.length>0) {
-              lastSegment = segments[segments.length-1];
-              startTime = lastSegment.endTime;
-            } else {
-              startTime = peaksInstance.player.getCurrentTime()
-            }
+            // segments = peaksInstance.segments.getSegments();
+            // if(segments.length>0) {
+            //   lastSegment = segments[segments.length-1];
+            //   startTime = lastSegment.endTime;
+            // } else {
+            //   startTime = peaksInstance.player.getCurrentTime()
+            // }
+            startTime = peaksInstance.player.getCurrentTime()
             peaksInstance.segments.add({
               startTime: startTime,
               endTime: startTime + 3,
