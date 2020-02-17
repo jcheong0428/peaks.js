@@ -511,6 +511,16 @@
           peaksInstance.on('player_seek', function(segment) {
             vid.currentTime = peaksInstance.player.getCurrentTime();
           });
+
+          vid.onplay = function() {
+            peaksInstance.player.seek(vid.currentTime);
+            peaksInstance.player.play()
+          };
+
+          vid.onpause = function() {
+            peaksInstance.player.seek(vid.currentTime);
+            peaksInstance.player.pause()
+          };
         });
       })(peaks);
 
