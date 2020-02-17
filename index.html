@@ -500,14 +500,6 @@
           var vid = document.getElementById("video");
           vid.defaultMuted = true;
 
-          // function seekAndPlayVideo() {
-          //   vid.currentTime = peaksInstance.player.getCurrentTime();
-          // };
-
-          peaksInstance.on('segments.exit', function(segment) {
-            vid.pause();
-          });
-
           peaksInstance.on('player_play', function(segment) {
             vid.currentTime = peaksInstance.player.getCurrentTime();
             vid.play()
@@ -519,7 +511,6 @@
           peaksInstance.on('player_seek', function(segment) {
             vid.currentTime = peaksInstance.player.getCurrentTime();
           });
-          // How do I make the player emit a signal to play the video too???
         });
       })(peaks);
 
