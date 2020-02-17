@@ -123,8 +123,8 @@
         <button data-action="add-segment1">Add segment: Speaker 1</button>
         <button data-action="add-segment2">Add segment: Speaker 2</button>
         <button data-action="add-segment3">Add segment: Speaker 3</button>
-        <button data-action="add-segment-no">Add segment: No speech</button>
-        <button data-action="add-segment-over">Add segment: Overlapping speech</button>
+        <!-- <button data-action="add-segment-no">Add segment: No speech</button> -->
+        <!-- <button data-action="add-segment-over">Add segment: Overlapping speech</button> -->
         <button data-action="add-point-expstart">Add Trial Start indicator</button>
         <button data-action="log-data">Log segments/points</button>
         <input type="text" id="seek-time" value="0.0">
@@ -325,38 +325,38 @@
             });
             renderSegments(peaksInstance);
           });
-          document.querySelector('button[data-action="add-segment-no"]').addEventListener('click', function() {
-            segments = peaksInstance.segments.getSegments();
-            if(segments.length>0) {
-              lastSegment = segments[segments.length-1];
-              startTime = lastSegment.endTime;
-            } else {
-              startTime = peaksInstance.player.getCurrentTime()
-            }
-            peaksInstance.segments.add({
-              startTime: startTime,
-              endTime: startTime + 3,
-              labelText: "No Speaker",
-              editable: true
-            });
-            renderSegments(peaksInstance);
-          });
-          document.querySelector('button[data-action="add-segment-over"]').addEventListener('click', function() {
-            segments = peaksInstance.segments.getSegments();
-            if(segments.length>0) {
-              lastSegment = segments[segments.length-1];
-              startTime = lastSegment.endTime;
-            } else {
-              startTime = peaksInstance.player.getCurrentTime()
-            }
-            peaksInstance.segments.add({
-              startTime: startTime,
-              endTime: startTime + 3,
-              labelText: "Overlapping Speaker",
-              editable: true
-            });
-            renderSegments(peaksInstance);
-          });
+          // document.querySelector('button[data-action="add-segment-no"]').addEventListener('click', function() {
+          //   segments = peaksInstance.segments.getSegments();
+          //   if(segments.length>0) {
+          //     lastSegment = segments[segments.length-1];
+          //     startTime = lastSegment.endTime;
+          //   } else {
+          //     startTime = peaksInstance.player.getCurrentTime()
+          //   }
+          //   peaksInstance.segments.add({
+          //     startTime: startTime,
+          //     endTime: startTime + 3,
+          //     labelText: "No Speaker",
+          //     editable: true
+          //   });
+          //   renderSegments(peaksInstance);
+          // });
+          // document.querySelector('button[data-action="add-segment-over"]').addEventListener('click', function() {
+          //   segments = peaksInstance.segments.getSegments();
+          //   if(segments.length>0) {
+          //     lastSegment = segments[segments.length-1];
+          //     startTime = lastSegment.endTime;
+          //   } else {
+          //     startTime = peaksInstance.player.getCurrentTime()
+          //   }
+          //   peaksInstance.segments.add({
+          //     startTime: startTime,
+          //     endTime: startTime + 3,
+          //     labelText: "Overlapping Speaker",
+          //     editable: true
+          //   });
+          //   renderSegments(peaksInstance);
+          // });
 
           document.querySelector('button[data-action="add-point-expstart"]').addEventListener('click', function() {
             peaksInstance.points.add({
